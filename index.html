@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Password Generator & Encryptor (Optimized Password Suite: AES-256-GCM)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- HEADER -->
+    <header class="header-card">
+      <div class="header-copy">
+        <span class="eyebrow">SECURE PASSWORD STUDIO</span>
+        <h1>Your passwords. Protected.</h1>
+        <p class="subtitle">Generate securely, encrypt locally, and decrypt only when you need to.</p>
+      </div>
+      <div class="header-actions">
+        <label class="theme-switch" for="themeToggle">
+          <input type="checkbox" id="themeToggle" checked />
+          <span class="slider"></span>
+          <span class="theme-label" id="themeLabel">Dark mode</span>
+        </label>
+      </div>
+    </header>
+
+    <!-- MAIN WORKFLOW TABS -->
+    <main class="main-container">
+      <nav class="workflow-tabs" role="tablist">
+        <button class="tab-btn active" data-target="tab-generate" role="tab">01 &nbsp;Generate</button>
+        <button class="tab-btn" data-target="tab-encrypt" role="tab">02 &nbsp;Encrypt</button>
+        <button class="tab-btn" data-target="tab-decrypt" role="tab">03 &nbsp;Decrypt</button>
+      </nav>
+
+      <!-- TAB 01: GENERATE -->
+      <section id="tab-generate" class="tab-panel active">
+        <div class="card">
+          <div class="section-heading">
+            <h2>01 &nbsp;Password generator</h2>
+            <p>Create a unique-character password (up to 94 raw / 88 without ambiguous chars) or a passphrase.</p>
+          </div>
+
+          <!-- Inner Sub-tabs -->
+          <div class="sub-tabs">
+            <button class="sub-tab-btn active" data-subtarget="sub-random">Random password</button>
+            <button class="sub-tab-btn" data-subtarget="sub-phrase">Passphrase</button>
+          </div>
+
+          <!-- Sub-tab: Random Password -->
+          <div id="sub-random" class="sub-panel active">
+            <div class="control-group">
+              <label id="lenLabel" class="bold-label" for="lenSlider">Length: 20 unique characters (Max: 94)</label>
+              <input type="range" id="lenSlider" min="16" max="94" value="20" step="1" class="range-slider" />
+            </div>
+
+            <button id="generateRandomBtn" class="btn btn-primary btn-block">Generate password</button>
+
+            <div class="checkbox-row">
+              <label class="chk-label"><input type="checkbox" id="chkLower" checked /> <span>a-z</span></label>
+              <label class="chk-label"><input type="checkbox" id="chkUpper" checked /> <span>A-Z</span></label>
+              <label class="chk-label"><input type="checkbox" id="chkDigits" checked /> <span>0-9</span></label>
+              <label class="chk-label"><input type="checkbox" id="chkSymbols" checked /> <span>Symbols</span></label>
+            </div>
+
+            <div class="checkbox-row single">
+              <label class="chk-label">
+                <input type="checkbox" id="chkAmbiguous" />
+                <span>Exclude ambiguous characters (0, O, 1, l, I, |) — Max 88 unique</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Sub-tab: Passphrase -->
+          <div id="sub-phrase" class="sub-panel">
+            <div class="control-group">
+              <label id="wordsLabel" class="bold-label" for="wordsSlider">Words: 5</label>
+              <input type="range" id="wordsSlider" min="4" max="12" value="5" step="1" class="range-slider" />
+            </div>
+
+            <div class="control-group">
+              <label class="bold-label" for="sepSelect">Word separator</label>
+              <select id="sepSelect" class="select-input">
+                <option value="-">-</option>
+                <option value="_">_</option>
+                <option value=".">.</option>
+                <option value="Space">Space</option>
+                <option value="/">/</option>
+              </select>
+            </div>
+
+            <div class="checkbox-row">
+              <label class="chk-label"><input type="checkbox" id="chkTitleCase" checked /> <span>Title case</span></label>
+              <label class="chk-label"><input type="checkbox" id="chkAppendNum" checked /> <span>Add number &amp; symbol</span></label>
+            </div>
+
+            <button id="generatePhraseBtn" class="btn btn-primary btn-block">Generate passphrase</button>
+          </div>
+
+          <hr class="divider" />
+
+          <!-- Generated Password Output -->
+          <div class="section-heading compact">
+            <h3>Generated password</h3>
+            <p>Edit the value here if you want to encrypt a custom password.</p>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="rawPassInput">Generated password or custom text</label>
+            <input type="text" id="rawPassInput" class="text-input mono" placeholder="Password to encrypt or custom password…" autocomplete="off" spellcheck="false" />
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-secondary" id="copyRawBtn">Copy</button>
+            <button class="btn btn-secondary" id="pasteRawBtn">Paste</button>
+            <button class="btn btn-ghost" data-toggle-vis="rawPassInput">🙈 Hide</button>
+          </div>
+
+          <div class="meter-box">
+            <div class="strength-track">
+              <div id="strengthBar" class="strength-fill"></div>
+            </div>
+            <div id="entropyLabel" class="bold-label">Strength: N/A | Entropy: 0.0 bits</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 02: ENCRYPT -->
+      <section id="tab-encrypt" class="tab-panel">
+        <div class="card">
+          <div class="section-heading">
+            <h2>02 &nbsp;Encryption</h2>
+            <p>Protect your password with authenticated encryption.</p>
+          </div>
+
+          <div class="mode-box">
+            <label class="radio-label">
+              <input type="radio" name="encryptMode" value="AES" checked />
+              <span class="radio-title">AES-256-GCM</span>
+            </label>
+            <div class="radio-desc">Strong encryption · 1M PBKDF2 iterations</div>
+            <label class="radio-label">
+              <input type="radio" name="encryptMode" value="B64" />
+              <span>Base64 encoding (not encryption)</span>
+            </label>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="masterKeyInput">Master password for encryption</label>
+            <input type="password" id="masterKeyInput" class="text-input mono" placeholder="Master key · 12+ chars with upper, lower, number &amp; symbol" autocomplete="off" spellcheck="false" />
+          </div>
+
+          <div class="action-row spread">
+            <div class="action-left">
+              <button class="btn btn-ghost" id="visMasterBtn" data-toggle-vis="masterKeyInput">👁 Show</button>
+              <button class="btn btn-secondary" id="copyMasterBtn">Copy key</button>
+              <button class="btn btn-secondary" id="pasteMasterBtn">Paste</button>
+            </div>
+            <button class="btn btn-primary" id="encryptBtn">Encrypt</button>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="encryptedOutput">Encrypted output token</label>
+            <input type="text" id="encryptedOutput" class="text-input mono-sm" placeholder="Encrypted token appears here…" autocomplete="off" spellcheck="false" />
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-secondary" id="copyEncryptedBtn">Copy</button>
+            <button class="btn btn-secondary" id="pasteEncryptedBtn">Paste</button>
+            <button class="btn btn-ghost" data-toggle-vis="encryptedOutput">🙈 Hide</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 03: DECRYPT -->
+      <section id="tab-decrypt" class="tab-panel">
+        <div class="card">
+          <div class="section-heading">
+            <h2>03 &nbsp;Decryption</h2>
+            <p>Decrypt a token using its original master key.</p>
+          </div>
+
+          <div class="mode-box">
+            <label class="radio-label">
+              <input type="radio" name="decryptMode" value="AES" checked />
+              <span class="radio-title">AES-256-GCM</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="decryptMode" value="B64" />
+              <span>Base64 decoding (not encryption)</span>
+            </label>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="decryptInput">Encrypted token to decrypt</label>
+            <input type="text" id="decryptInput" class="text-input mono-sm" placeholder="Encrypted token to decrypt · paste token here" autocomplete="off" spellcheck="false" />
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-secondary" id="pasteDecryptTokenBtn">Paste</button>
+            <button class="btn btn-secondary" id="copyDecryptTokenBtn">Copy</button>
+            <button class="btn btn-ghost" data-toggle-vis="decryptInput">🙈 Hide</button>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="decryptKeyInput">Master password for decryption</label>
+            <input type="password" id="decryptKeyInput" class="text-input mono" placeholder="Enter the original master key used for encryption" autocomplete="off" spellcheck="false" />
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-ghost" id="visDecryptKeyBtn" data-toggle-vis="decryptKeyInput">👁 Show</button>
+            <button class="btn btn-secondary" id="copyDecryptKeyBtn">Copy key</button>
+            <button class="btn btn-secondary" id="pasteDecryptKeyBtn">Paste</button>
+          </div>
+
+          <div class="control-group">
+            <button class="btn btn-success btn-block" id="decryptBtn">Decrypt token</button>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="decryptedOutput">Decrypted plaintext</label>
+            <input type="text" id="decryptedOutput" class="text-input mono" placeholder="Decrypted password appears here · auto-clears in 30 sec" readonly autocomplete="off" spellcheck="false" />
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-secondary" id="copyDecryptedBtn">Copy</button>
+            <button class="btn btn-ghost" data-toggle-vis="decryptedOutput">🙈 Hide</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- STATUS BAR -->
+    <footer class="status-bar">
+      <div id="statusText" class="status-text">Ready · Encryption runs in the background</div>
+      <div class="status-actions">
+        <button class="btn btn-danger-soft" id="wipeScreenBtn">Wipe screen &amp; cache</button>
+        <button class="btn btn-danger" id="clearAllBtn">Clear everything</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODAL FOR WARNINGS / ERRORS -->
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3 id="modalTitle">Notice</h3>
+      <p id="modalMessage"></p>
+      <button id="modalCloseBtn" class="btn btn-primary">OK</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
